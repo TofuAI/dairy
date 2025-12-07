@@ -5,121 +5,150 @@
 <title>Secret Diary</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+<!-- Font viết tay + chữ nghiêng nhẹ -->
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Homemade+Apple&display=swap" rel="stylesheet">
 
+<style>
 body{
   margin:0;
-  background:linear-gradient(180deg,#e0f2fe,#f8fafc);
-  font-family: 'Patrick Hand', cursive;
+  min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
+  background:
+    linear-gradient(180deg,#e0f2fe,#f0f9ff,#ffffff);
 }
 
 .diary{
   width:94%;
-  max-width:720px;
-  background:#fffffb;
-  border-radius:24px;
-  padding:24px;
+  max-width:740px;
+  background:#fffdf7;
+  padding:40px 40px 30px;
+  border-radius:26px;
+  border:6px solid #bae6fd;
   box-shadow:
-    0 10px 40px rgba(0,0,0,0.07),
+    0 25px 40px rgba(0,0,0,0.08),
     inset 0 0 30px rgba(56,189,248,0.12);
-  border:4px solid #bae6fd;
   position:relative;
 }
 
-/* viền giấy */
-.diary::after{
-  content:'';
+/* viền giấy cổ */
+.diary::before{
+  content:"";
   position:absolute;
-  inset:14px;
-  border:2px dashed #93c5fd;
-  border-radius:15px;
+  inset:16px;
+  border:2px dashed rgba(56,189,248,0.35);
+  border-radius:18px;
   pointer-events:none;
 }
 
+/* lỗ đóng gáy */
+.holes{
+  position:absolute;
+  top:40px;
+  left:-8px;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+.hole{
+  width:16px;
+  height:16px;
+  background:#e0f2fe;
+  border:2px solid #38bdf8;
+  border-radius:50%;
+}
+
 h1{
+  font-family: 'Homemade Apple', cursive;
   text-align:center;
-  font-weight:400;
-  margin:0 0 12px;
   color:#0369a1;
   font-size:34px;
+  margin:0 0 6px;
 }
 
 .subtitle{
   text-align:center;
-  font-size:15px;
+  font-size:14px;
   color:#64748b;
-  margin-bottom:18px;
+  margin-bottom:14px;
+  font-family: 'Patrick Hand', cursive;
+  letter-spacing:1px;
 }
 
 input, textarea, button{
   font-family: 'Patrick Hand', cursive;
 }
 
+/* mật khẩu */
 input{
   width:100%;
-  padding:12px 14px;
-  border-radius:10px;
+  padding:12px 15px;
+  margin-bottom:10px;
+  border-radius:12px;
   border:2px solid #bae6fd;
   background:#f0f9ff;
-  font-size:15px;
+  font-size:16px;
 }
 
+/* trang giấy kẻ dòng */
 textarea{
   width:100%;
-  height:220px;
-  padding:14px;
-  margin-top:12px;
-  border-radius:16px;
+  height:260px;
+  padding:20px;
+  border-radius:20px;
   border:2px solid #bae6fd;
   background:
     repeating-linear-gradient(
+      to bottom,
       transparent,
       transparent 26px,
-      rgba(147,197,253,0.25) 27px
+      rgba(147,197,253,0.4) 27px
     );
-  resize:none;
-  font-size:17px;
+  font-size:18px;
   line-height:27px;
+  resize:none;
+  display:block;
+  margin:auto;
 }
 
+/* nút bấm */
 .buttons{
-  margin-top:14px;
+  margin-top:16px;
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:10px;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
 
 button{
   padding:10px;
-  border-radius:14px;
+  border-radius:18px;
   border:none;
   background:linear-gradient(180deg,#7dd3fc,#38bdf8);
   color:#083344;
   font-size:15px;
   cursor:pointer;
-  transition:.2s;
-  box-shadow:0 4px 10px rgba(56,189,248,0.4);
+  transition:0.2s;
+  box-shadow:0 5px 14px rgba(56,189,248,0.45);
 }
 
 button:hover{
-  transform:translateY(-2px);
+  transform:translateY(-2px) scale(1.02);
 }
 
+/* ghi chú */
 .tip{
-  margin-top:16px;
+  margin-top:18px;
+  text-align:center;
   font-size:13px;
   color:#475569;
-  text-align:center;
+  line-height:1.6;
 }
-.tip span{color:#0284c7;}
+
+.tip span{color:#0284c7}
 
 footer{
-  margin-top:7px;
+  margin-top:10px;
   text-align:center;
   font-size:12px;
   color:#94a3b8;
@@ -128,16 +157,22 @@ footer{
 </head>
 
 <body>
+
 <div class="diary">
 
-  <h1>📓 Secret Diary</h1>
-  <div class="subtitle">Nơi cất giữ những điều không thể nói ra</div>
+  <div class="holes">
+    <div class="hole"></div>
+    <div class="hole"></div>
+    <div class="hole"></div>
+    <div class="hole"></div>
+  </div>
 
-  <input type="password" id="password" placeholder="Nhập mật khẩu bí mật của bạn...
+  <h1>Secret Diary</h1>
+  <div class="subtitle">Nơi cất giữ những điều không thể nói</div>
 
-">
+  <input type="password" id="password" placeholder="Mật khẩu của bạn...">
 
-  <textarea id="diary" placeholder="Một ngày nào đó, bạn sẽ đọc lại những dòng này..."></textarea>
+  <textarea id="diary" placeholder="Hôm nay... trời thế nào trong lòng mình?"></textarea>
 
   <div class="buttons">
     <button onclick="saveDiary()">🔒 Mã hóa & Lưu</button>
@@ -147,13 +182,12 @@ footer{
   </div>
 
   <div class="tip">
-    🔐 Dữ liệu luôn được <span>mã hóa AES-256</span> trên thiết bị của bạn  
-    <br>
-    🌙 Hoạt động 100% offline • An toàn • Riêng tư
+    🔐 Dữ liệu được <span>mã hóa bằng AES-256</span><br>
+    ☁ Không lưu trên server – chỉ có bạn giữ nó
   </div>
 
   <footer>
-    Made by Huy • For quiet hearts • Hosted on GitHub
+    Made by Huy • My quiet place
   </footer>
 
 </div>
@@ -258,7 +292,6 @@ function exportData(){
 
   const blob = new Blob([data], {type:"application/json"});
   const a = document.createElement("a");
-
   a.href = URL.createObjectURL(blob);
   a.download = "secret-diary.json";
   a.click();
