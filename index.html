@@ -1,210 +1,288 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Secret Diary</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body{
-      margin:0;
-      font-family: Arial, sans-serif;
-      background:#0f172a;
-      color:white;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-height:100vh;
-    }
-    .app{
-      width:95%;
-      max-width:700px;
-      background:#020617;
-      padding:20px;
-      border-radius:15px;
-      box-shadow:0 0 20px #000;
-    }
-    h1{
-      text-align:center;
-      color:#38bdf8;
-    }
-    textarea{
-      width:100%;
-      height:220px;
-      background:#0f172a;
-      color:white;
-      border:1px solid #1e293b;
-      border-radius:10px;
-      padding:10px;
-      font-size:15px;
-      resize:none;
-    }
-    input,button{
-      width:100%;
-      padding:10px;
-      margin-top:10px;
-      border-radius:8px;
-      border:none;
-      font-size:14px;
-    }
-    input{
-      background:#0f172a;
-      color:white;
-      border:1px solid #1e293b;
-    }
-    button{
-      background:#38bdf8;
-      color:#020617;
-      font-weight:bold;
-      cursor:pointer;
-    }
-    .small{
-      font-size:13px;
-      color:#94a3b8;
-      margin-top:5px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Secret Diary</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+
+body{
+  margin:0;
+  background:linear-gradient(180deg,#e0f2fe,#f8fafc);
+  font-family: 'Patrick Hand', cursive;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.diary{
+  width:94%;
+  max-width:720px;
+  background:#fffffb;
+  border-radius:24px;
+  padding:24px;
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.07),
+    inset 0 0 30px rgba(56,189,248,0.12);
+  border:4px solid #bae6fd;
+  position:relative;
+}
+
+/* viền giấy */
+.diary::after{
+  content:'';
+  position:absolute;
+  inset:14px;
+  border:2px dashed #93c5fd;
+  border-radius:15px;
+  pointer-events:none;
+}
+
+h1{
+  text-align:center;
+  font-weight:400;
+  margin:0 0 12px;
+  color:#0369a1;
+  font-size:34px;
+}
+
+.subtitle{
+  text-align:center;
+  font-size:15px;
+  color:#64748b;
+  margin-bottom:18px;
+}
+
+input, textarea, button{
+  font-family: 'Patrick Hand', cursive;
+}
+
+input{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  border:2px solid #bae6fd;
+  background:#f0f9ff;
+  font-size:15px;
+}
+
+textarea{
+  width:100%;
+  height:220px;
+  padding:14px;
+  margin-top:12px;
+  border-radius:16px;
+  border:2px solid #bae6fd;
+  background:
+    repeating-linear-gradient(
+      transparent,
+      transparent 26px,
+      rgba(147,197,253,0.25) 27px
+    );
+  resize:none;
+  font-size:17px;
+  line-height:27px;
+}
+
+.buttons{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+}
+
+button{
+  padding:10px;
+  border-radius:14px;
+  border:none;
+  background:linear-gradient(180deg,#7dd3fc,#38bdf8);
+  color:#083344;
+  font-size:15px;
+  cursor:pointer;
+  transition:.2s;
+  box-shadow:0 4px 10px rgba(56,189,248,0.4);
+}
+
+button:hover{
+  transform:translateY(-2px);
+}
+
+.tip{
+  margin-top:16px;
+  font-size:13px;
+  color:#475569;
+  text-align:center;
+}
+.tip span{color:#0284c7;}
+
+footer{
+  margin-top:7px;
+  text-align:center;
+  font-size:12px;
+  color:#94a3b8;
+}
+</style>
 </head>
+
 <body>
-<div class="app">
+<div class="diary">
+
   <h1>📓 Secret Diary</h1>
+  <div class="subtitle">Nơi cất giữ những điều không thể nói ra</div>
 
-  <input type="password" id="password" placeholder="Nhập mật khẩu bí mật của bạn...">
+  <input type="password" id="password" placeholder="Nhập mật khẩu bí mật của bạn...
 
-  <textarea id="diary" placeholder="Viết nhật kí tại đây..."></textarea>
+">
 
-  <button onclick="saveDiary()">🔒 Mã hóa & Lưu</button>
-  <button onclick="loadDiary()">🔓 Giải mã & Mở lại</button>
-  <button onclick="exportData()">📁 Xuất dữ liệu</button>
-  <button onclick="importData()">📥 Nhập dữ liệu</button>
+  <textarea id="diary" placeholder="Một ngày nào đó, bạn sẽ đọc lại những dòng này..."></textarea>
 
-  <div class="small">
-    ✔ Mọi thứ chạy OFFLINE trên trình duyệt <br>
-    ✔ Không ai có thể đọc nếu không có mật khẩu<br>
-    ✔ Phù hợp để dùng trên GitHub Pages
+  <div class="buttons">
+    <button onclick="saveDiary()">🔒 Mã hóa & Lưu</button>
+    <button onclick="loadDiary()">🔓 Mở lại</button>
+    <button onclick="exportData()">📁 Xuất</button>
+    <button onclick="importData()">📥 Nhập</button>
   </div>
+
+  <div class="tip">
+    🔐 Dữ liệu luôn được <span>mã hóa AES-256</span> trên thiết bị của bạn  
+    <br>
+    🌙 Hoạt động 100% offline • An toàn • Riêng tư
+  </div>
+
+  <footer>
+    Made by Huy • For quiet hearts • Hosted on GitHub
+  </footer>
+
 </div>
 
 <script>
-  async function getKey(password, salt){
-    const enc = new TextEncoder();
-    const keyMaterial = await crypto.subtle.importKey(
-      "raw",
-      enc.encode(password),
-      {name:"PBKDF2"},
-      false,
-      ["deriveKey"]
-    );
+/* ==== CRYPTO ==== */
+async function getKey(password, salt){
+  const enc = new TextEncoder();
 
-    return await crypto.subtle.deriveKey(
-      {
-        name:"PBKDF2",
-        salt:salt,
-        iterations:100000,
-        hash:"SHA-256"
-      },
-      keyMaterial,
-      {name:"AES-GCM",length:256},
-      false,
-      ["encrypt","decrypt"]
-    );
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
+  );
+
+  return await crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: salt,
+      iterations: 100000,
+      hash: "SHA-256"
+    },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt","decrypt"]
+  );
+}
+
+async function encrypt(text, password){
+  const enc = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+
+  const key = await getKey(password, salt);
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: iv },
+    key,
+    enc.encode(text)
+  );
+
+  return {
+    iv: Array.from(iv),
+    salt: Array.from(salt),
+    data: Array.from(new Uint8Array(encrypted))
+  };
+}
+
+async function decrypt(obj, password){
+  const iv = new Uint8Array(obj.iv);
+  const salt = new Uint8Array(obj.salt);
+  const data = new Uint8Array(obj.data);
+
+  const key = await getKey(password, salt);
+
+  const decrypted = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: iv },
+    key,
+    data
+  );
+
+  return new TextDecoder().decode(decrypted);
+}
+
+/* ==== FUNCTIONS ==== */
+async function saveDiary(){
+  const text = diary.value.trim();
+  const password = document.getElementById("password").value;
+
+  if(!password) return alert("Bạn phải nhập mật khẩu!");
+  if(!text) return alert("Chưa viết gì!");
+
+  const encrypted = await encrypt(text, password);
+  localStorage.setItem("secret-diary", JSON.stringify(encrypted));
+
+  diary.value="";
+  alert("✅ Đã mã hóa và lưu lại!");
+}
+
+async function loadDiary(){
+  const password = document.getElementById("password").value;
+  const data = localStorage.getItem("secret-diary");
+
+  if(!password) return alert("Nhập mật khẩu!");
+  if(!data) return alert("Không có dữ liệu!");
+
+  try{
+    const decrypted = await decrypt(JSON.parse(data), password);
+    diary.value = decrypted;
+    alert("✅ Mở khóa thành công!");
+  }catch{
+    alert("❌ Sai mật khẩu hoặc dữ liệu lỗi!");
   }
+}
 
-  async function encrypt(text, password){
-    const enc = new TextEncoder();
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const salt = crypto.getRandomValues(new Uint8Array(16));
+function exportData(){
+  const data = localStorage.getItem("secret-diary");
+  if(!data) return alert("Chưa có dữ liệu!");
 
-    const key = await getKey(password, salt);
+  const blob = new Blob([data], {type:"application/json"});
+  const a = document.createElement("a");
 
-    const encrypted = await crypto.subtle.encrypt(
-      {name:"AES-GCM", iv: iv},
-      key,
-      enc.encode(text)
-    );
+  a.href = URL.createObjectURL(blob);
+  a.download = "secret-diary.json";
+  a.click();
+}
 
-    return {
-      iv: Array.from(iv),
-      salt: Array.from(salt),
-      data: Array.from(new Uint8Array(encrypted))
+function importData(){
+  const input = document.createElement("input");
+  input.type = "file";
+
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      localStorage.setItem("secret-diary", reader.result);
+      alert("✅ Đã nhập dữ liệu hoàn tất!");
     };
-  }
 
-  async function decrypt(obj, password){
-    const iv = new Uint8Array(obj.iv);
-    const salt = new Uint8Array(obj.salt);
-    const data = new Uint8Array(obj.data);
+    reader.readAsText(file);
+  };
 
-    const key = await getKey(password, salt);
-
-    const decrypted = await crypto.subtle.decrypt(
-      {name:"AES-GCM", iv: iv},
-      key,
-      data
-    );
-
-    return new TextDecoder().decode(decrypted);
-  }
-
-  async function saveDiary(){
-    const text = diary.value;
-    const password = document.getElementById("password").value;
-
-    if(!password) return alert("Bạn phải nhập mật khẩu!");
-    if(!text) return alert("Chưa viết gì!");
-
-    const encrypted = await encrypt(text, password);
-    localStorage.setItem("secret-diary", JSON.stringify(encrypted));
-
-    diary.value="";
-    alert("✅ Đã mã hóa và lưu an toàn!");
-  }
-
-  async function loadDiary(){
-    const password = document.getElementById("password").value;
-    if(!password) return alert("Nhập mật khẩu!");
-
-    const data = localStorage.getItem("secret-diary");
-    if(!data) return alert("Chưa có nhật kí!");
-
-    try{
-      const decrypted = await decrypt(JSON.parse(data), password);
-      diary.value = decrypted;
-      alert("✅ Mở khóa thành công!");
-    }catch{
-      alert("❌ Sai mật khẩu hoặc dữ liệu lỗi!");
-    }
-  }
-
-  function exportData(){
-    const data = localStorage.getItem("secret-diary");
-    if(!data) return alert("Không có dữ liệu!");
-
-    const blob = new Blob([data], {type:"application/json"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "secret-diary.json";
-    a.click();
-  }
-
-  function importData(){
-    const input = document.createElement("input");
-    input.type = "file";
-
-    input.onchange = e => {
-      const file = e.target.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        localStorage.setItem("secret-diary", reader.result);
-        alert("✅ Nhập dữ liệu thành công!");
-      };
-
-      reader.readAsText(file);
-    };
-
-    input.click();
-  }
+  input.click();
+}
 </script>
 </body>
 </html>
