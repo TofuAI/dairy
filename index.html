@@ -1,154 +1,712 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secret Diary</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Secret Diary — FULL</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Homemade+Apple&family=Merriweather&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
+/* box sizing */
+*{box-sizing:border-box}
+:root{
+  --paper:#fffdf6;
+  --accent:#38bdf8;
+  --ink:#2b2b2b;
+  --muted:#7b8794;
+  --gutter:20px;
+}
 
+/* page layout */
 body{
+  margin:0;
   min-height:100vh;
-  background:linear-gradient(150deg,#020617,#0f172a,#020617);
+  font-family: 'Inter', system-ui, sans-serif;
+  background:linear-gradient(180deg,#f0f9ff 0%, #fefcf2 60%);
   display:flex;
   justify-content:center;
+  align-items:flex-start;
+  padding:40px 16px;
+  color:var(--ink);
+}
+
+/* app shell */
+.app{
+  width:100%;
+  max-width:980px;
+  display:grid;
+  grid-template-columns: 320px 1fr;
+  gap:24px;
+  align-items:start;
+}
+
+/* sidebar (controls + list) */
+.sidebar{
+  background:linear-gradient(180deg, #f8feff, #f0fbff);
+  border-radius:16px;
+  padding:18px;
+  box-shadow:0 10px 30px rgba(10,20,30,0.08);
+  border:1px solid rgba(56,189,248,0.12);
+  height:calc(100vh - 120px);
+  overflow:auto;
+}
+
+/* header */
+.brand{
+  display:flex;
+  gap:12px;
   align-items:center;
-  font-family: 'Merriweather', serif;
+  margin-bottom:12px;
+}
+.logo{
+  width:46px;height:46px;border-radius:10px;
+  background:linear-gradient(180deg, #7dd3fc, #38bdf8);
+  display:flex;align-items:center;justify-content:center;
+  color:#042b36;font-weight:700;font-size:20px;
+  box-shadow:0 6px 12px rgba(56,189,248,0.18);
+}
+.title{font-family:'Patrick Hand', cursive;font-size:18px;color:#044e61}
+.subtitle{font-size:12px;color:var(--muted)}
+
+/* controls */
+.controls{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.ctrl-btn{
+  padding:10px;border-radius:10px;border:none;background:var(--accent);
+  color:#042b36;font-weight:600;cursor:pointer;box-shadow:0 6px 10px rgba(56,189,248,0.18);
+}
+.ghost{background:#fff;border:1px solid rgba(10,10,10,0.06);box-shadow:none;color:var(--ink);font-weight:500}
+
+/* panic */
+.panic{background:linear-gradient(180deg,#ffb4b4,#ff7a7a);color:#4b0303;font-weight:700;border:none}
+
+/* list of entries */
+.list{margin-top:14px}
+.entry-item{
+  padding:10px;border-radius:10px;margin-bottom:8px;
+  cursor:pointer;border:1px dashed rgba(6,22,34,0.04);
+  background:linear-gradient(180deg,#ffffff,#fcffff);
+}
+.entry-item small{display:block;color:var(--muted);font-size:12px}
+
+/* canvas (paper) */
+.canvas{
+  background:transparent;
+  min-height:500px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-.diary{
-  width:92%;
-  max-width:740px;
-  background:#faf3e0;
+/* paper */
+.paper{
+  width:100%;
+  max-width:620px;
+  min-height:520px;
+  background:var(--paper);
   border-radius:18px;
-  padding:28px;
-  box-shadow:
-    0 0 0 5px #7c2d12,
-    0 0 0 16px #d6bfa8,
-    0 20px 40px rgba(0,0,0,0.6);
+  padding:28px 30px;
+  box-shadow: 0 24px 60px rgba(10,12,20,0.12);
   position:relative;
+  border:1px solid rgba(120,100,80,0.06);
+  overflow:hidden;
 }
 
-.diary::before{
-  content:"";
-  position:absolute;
-  inset:24px;
-  border:1.8px dashed rgba(60,20,20,0.5);
-  border-radius:12px;
+/* inner fake margin (paper border) */
+.paper::before{
+  content:'';
+  position:absolute;inset:18px;border-radius:12px;
+  border:2px dashed rgba(180,160,140,0.08);
   pointer-events:none;
 }
 
-h1{
-  text-align:center;
-  margin-bottom:18px;
-  font-size:32px;
-  color:#3b1f12;
-  font-family: 'Homemade Apple', cursive;
+/* header area on paper */
+.paper-header{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;
+}
+.paper-title{font-family:'Patrick Hand',cursive;font-size:24px;color:#18424b}
+.paper-meta{font-size:13px;color:var(--muted)}
+
+/* page flip stage */
+.stage{position:relative;perspective:1400px;margin-top:6px}
+
+/* page (front/back) */
+.page{
+  width:100%;
+  min-height:360px;
+  border-radius:10px;
+  background:transparent;
+  position:relative;
+  transform-origin:left center;
+  transition:transform .7s cubic-bezier(.2,.9,.3,1), box-shadow .25s;
 }
 
-textarea{
+/* page inner content (lined paper effect) */
+.sheet{
+  background:
+    linear-gradient(transparent 0 34px, rgba(200,230,255,0.22) 35px),
+    repeating-linear-gradient( to bottom, rgba(220,235,255,0.18), rgba(220,235,255,0.18) 1px, transparent 1px, transparent 34px );
+  border-radius:10px;
+  padding:18px 18px 24px 20px;
+  min-height:360px;
+  box-shadow: inset 0 0 0 2px rgba(180,210,230,0.04);
+  font-family:'Patrick Hand',cursive;
+  font-size:18px;
+  color:#123;
+  line-height:1.8;
+  white-space:pre-wrap;
+  overflow:auto;
+}
+
+/* textarea overlay for editing */
+.editor{
   width:100%;
-  max-width:100%;
-  height:280px;
+  height:100%;
   border:none;
-  outline:none;
   resize:none;
   background:transparent;
+  outline:none;
+  font-family:inherit;
   font-size:18px;
+  color:inherit;
   line-height:1.8;
-  color:#2c1208;
-  padding:6px 4px;
-  font-family: 'Homemade Apple', cursive;
 }
 
-textarea::placeholder{
-  color:#7b4f3b;
-  opacity:0.45;
-}
+/* controls under paper */
+.paper-controls{display:flex;gap:10px;margin-top:14px;align-items:center}
+.icon-btn{padding:8px 12px;border-radius:10px;border:none;background:#fff;font-weight:600;cursor:pointer}
+.icon-btn.primary{background:var(--accent);color:#042b36;box-shadow:0 6px 10px rgba(56,189,248,0.16)}
 
-.ctrl{
-  margin-top:16px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
+/* lock overlay */
+.lock-overlay{
+  position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.06),rgba(255,255,255,0.02));
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);
+  z-index:40;
 }
-
-button{
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#7c2d12;
-  color:#fff;
-  font-size:15px;
-  cursor:pointer;
-  transition:.25s;
-}
-
-button:hover{
-  background:#9a3412;
-  transform:translateY(-1px);
-}
-
-footer{
+.lock-box{
+  background:#ffffff;border-radius:12px;padding:18px 16px;width:84%;
+  max-width:420px;border:1px solid rgba(6,10,20,0.04);
   text-align:center;
-  margin-top:10px;
-  font-size:12px;
-  opacity:.5;
-  color:#3b1f12;
+}
+.lock-box input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8;margin-top:8px}
+.lock-box small{display:block;color:var(--muted);margin-top:8px;font-size:13px}
+
+/* small screens */
+@media (max-width:900px){
+  .app{grid-template-columns:1fr;align-items:start}
+  .sidebar{height:auto;order:2}
+  .canvas{order:1;margin-bottom:16px}
+  .paper{min-height:440px}
 }
 </style>
 </head>
-
 <body>
 
-<div class="diary">
-  <h1>Nhật kí bí mật</h1>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Controls & archive">
+    <div class="brand">
+      <div class="logo">SD</div>
+      <div>
+        <div class="title">Secret Diary</div>
+        <div class="subtitle">Private • Encrypted • Offline</div>
+      </div>
+    </div>
 
-  <textarea id="note" placeholder="Hôm nay Huy muốn viết điều gì…?"></textarea>
+    <div style="margin-top:8px">
+      <div style="display:flex;gap:8px">
+        <button id="newBtn" class="ctrl-btn">➕ New Entry</button>
+        <button id="lockBtn" class="ctrl-btn ghost">🔒 Lock</button>
+      </div>
 
-  <div class="ctrl">
-    <button onclick="saveEntry()">Lưu vào nhật kí</button>
-    <button onclick="clearEntry()">Xoá trang này</button>
-  </div>
-  
-  <footer>Version: Secret Diary v1.3</footer>
+      <div class="controls">
+        <button id="exportBtn" class="ctrl-btn ghost">⬇︎ Export (encrypted)</button>
+        <button id="importBtn" class="ctrl-btn ghost">⬆︎ Import (encrypted)</button>
+        <button id="importLegacyBtn" class="ctrl-btn ghost">↪ Import legacy (SECRET_DIARY)</button>
+        <button id="panicBtn" class="ctrl-btn panic">⚠️ PANIC — Clear All</button>
+      </div>
+    </div>
+
+    <hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,#e6f6ff,transparent);margin:12px 0;border-radius:2px">
+
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Your entries</div>
+    <div id="entriesList" class="list"></div>
+
+    <div style="margin-top:12px;font-size:12px;color:var(--muted)">
+      Tip: dữ liệu được lưu cục bộ trên trình duyệt. Sao lưu bằng nút Export.
+    </div>
+  </aside>
+
+  <!-- CANVAS -->
+  <main class="canvas">
+    <div class="paper" id="paper">
+      <div class="paper-header">
+        <div>
+          <div class="paper-title" id="paperTitle">—</div>
+          <div class="paper-meta" id="paperMeta">—</div>
+        </div>
+        <div class="paper-meta" id="lockState">Locked</div>
+      </div>
+
+      <div class="stage">
+        <div class="page" id="page">
+          <div class="sheet" id="sheet">
+            <textarea id="editor" class="editor" placeholder="Viết điều gì đó…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="paper-controls">
+        <button id="prevBtn" class="icon-btn">◀ Prev</button>
+        <button id="nextBtn" class="icon-btn">Next ▶</button>
+        <button id="saveBtn" class="icon-btn primary">Save</button>
+        <button id="deleteBtn" class="icon-btn">Delete</button>
+      </div>
+
+      <!-- lock overlay -->
+      <div id="lockOverlay" class="lock-overlay" style="display:none">
+        <div class="lock-box">
+          <div style="font-weight:700;margin-bottom:6px">Mở nhật kí</div>
+          <input id="unlockPassword" type="password" placeholder="Nhập mật khẩu..." />
+          <div style="display:flex;gap:8px;margin-top:8px;justify-content:center">
+            <button id="unlockBtn" class="ctrl-btn">Mở khoá</button>
+            <button id="setPassBtn" class="ctrl-btn ghost">Tạo mật khẩu mới</button>
+          </div>
+          <small>Không có mật khẩu? Nhấn "Tạo mật khẩu mới" để đặt mật khẩu và khởi tạo một cuốn nhật kí mã hoá.</small>
+        </div>
+      </div>
+
+    </div>
+  </main>
 </div>
 
 <script>
-function saveEntry(){
-  const text = document.getElementById("note").value.trim();
-  if(!text){
-    alert("Huy chưa viết gì cả 😶");
+/* ===========================
+   Config & Storage keys
+   =========================== */
+const STORAGE_KEY = "secret-diary";    // main encrypted storage (keep to preserve previous encrypted data)
+const LEGACY_KEY = "SECRET_DIARY";     // optional legacy unencrypted key (if present, user can import)
+
+/* ===========================
+   Crypto helpers (WebCrypto)
+   PBKDF2 -> AES-GCM 256
+   =========================== */
+async function getKey(password, saltUint8){
+  const enc = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    {name: "PBKDF2"},
+    false,
+    ["deriveKey"]
+  );
+  return await window.crypto.subtle.deriveKey(
+    {
+      name:"PBKDF2",
+      salt: saltUint8,
+      iterations: 120000,
+      hash: "SHA-256"
+    },
+    keyMaterial,
+    {name:"AES-GCM", length:256},
+    false,
+    ["encrypt","decrypt"]
+  );
+}
+
+async function encryptObject(obj, password){
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await getKey(password, salt);
+  const enc = new TextEncoder();
+  const data = enc.encode(JSON.stringify(obj));
+  const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv:iv}, key, data);
+  return {
+    iv: Array.from(iv),
+    salt: Array.from(salt),
+    data: Array.from(new Uint8Array(ct))
+  };
+}
+
+async function decryptObject(encObj, password){
+  const iv = new Uint8Array(encObj.iv);
+  const salt = new Uint8Array(encObj.salt);
+  const data = new Uint8Array(encObj.data);
+  const key = await getKey(password, salt);
+  const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv:iv}, key, data);
+  const dec = new TextDecoder().decode(pt);
+  return JSON.parse(dec);
+}
+
+/* ===========================
+   App State
+   entries: array of {id, title, content, created}
+   locked: boolean
+   passwordCached: null | string
+   =========================== */
+let entries = [];
+let currentIndex = -1;
+let locked = true;
+let passwordCached = null;
+
+/* DOM */
+const entriesList = document.getElementById("entriesList");
+const editor = document.getElementById("editor");
+const paperTitle = document.getElementById("paperTitle");
+const paperMeta = document.getElementById("paperMeta");
+const lockOverlay = document.getElementById("lockOverlay");
+const lockState = document.getElementById("lockState");
+
+/* Buttons */
+const newBtn = document.getElementById("newBtn");
+const lockBtn = document.getElementById("lockBtn");
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+const importLegacyBtn = document.getElementById("importLegacyBtn");
+const panicBtn = document.getElementById("panicBtn");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const saveBtn = document.getElementById("saveBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+const unlockBtn = document.getElementById("unlockBtn");
+const setPassBtn = document.getElementById("setPassBtn");
+const unlockPassword = document.getElementById("unlockPassword");
+
+/* ===========================
+   UTILITIES
+   =========================== */
+function uid(){ return Math.random().toString(36).slice(2,10) }
+function nowISO(){ return new Date().toISOString() }
+function fmtDate(iso){ return new Date(iso).toLocaleString() }
+
+/* ===========================
+   RENDER
+   =========================== */
+function renderEntriesList(){
+  entriesList.innerHTML = "";
+  entries.forEach((e, idx)=>{
+    const el = document.createElement("div");
+    el.className = "entry-item";
+    el.innerHTML = `<strong>${e.title || ('Entry ' + (idx+1))}</strong><small>${fmtDate(e.created)}</small>`;
+    el.onclick = ()=>{ openIndex(idx) };
+    entriesList.appendChild(el);
+  });
+}
+
+/* open entry */
+function openIndex(i){
+  if(locked) return showLockOverlay();
+  if(i<0 || i>=entries.length) return;
+  currentIndex = i;
+  const e = entries[i];
+  paperTitle.textContent = e.title || `Trang ${i+1}`;
+  paperMeta.textContent = fmtDate(e.created);
+  editor.value = e.content || "";
+  lockState.textContent = "Unlocked";
+}
+
+/* new entry */
+function newEntry(){
+  if(locked) return showLockOverlay();
+  const id = uid();
+  const e = {id, title: `Trang mới`, content: "", created: nowISO()};
+  entries.unshift(e);
+  currentIndex = 0;
+  renderEntriesList();
+  openIndex(0);
+  editor.focus();
+  autoSave(); // immediate persist
+}
+
+/* save current */
+async function saveCurrent(){
+  if(locked) return showLockOverlay();
+  if(currentIndex<0 || !entries[currentIndex]) return;
+  entries[currentIndex].content = editor.value;
+  // update title summary (first line)
+  const firstLine = editor.value.split("\n").find(l=>l.trim().length>0) || "";
+  entries[currentIndex].title = firstLine.slice(0,48);
+  await persist(); // encrypt & store
+  renderEntriesList();
+  alert("Đã lưu");
+}
+
+/* delete current */
+async function deleteCurrent(){
+  if(locked) return showLockOverlay();
+  if(currentIndex<0) return;
+  if(!confirm("Xác nhận xoá trang này?")) return;
+  entries.splice(currentIndex,1);
+  currentIndex = Math.max(0, currentIndex-1);
+  renderEntriesList();
+  if(entries.length>0) openIndex(currentIndex);
+  else clearEditor();
+  await persist();
+}
+
+/* clear editor */
+function clearEditor(){
+  editor.value = "";
+  paperTitle.textContent = "—";
+  paperMeta.textContent = "—";
+  lockState.textContent = locked ? "Locked" : "Unlocked";
+}
+
+/* prev/next */
+function prevEntry(){
+  if(locked) return showLockOverlay();
+  if(entries.length===0) return;
+  currentIndex = Math.max(0, currentIndex-1);
+  openIndex(currentIndex);
+}
+function nextEntry(){
+  if(locked) return showLockOverlay();
+  if(entries.length===0) return;
+  currentIndex = Math.min(entries.length-1, currentIndex+1);
+  openIndex(currentIndex);
+}
+
+/* ===========================
+   Persistence: persist() and load()
+   Data model stored (encrypted) is {entries: [...]} 
+   =========================== */
+async function persist(){
+  if(!passwordCached){
+    console.warn("No password cached; cannot persist encrypted data.");
     return;
   }
+  const payload = {entries};
+  const enc = await encryptObject(payload, passwordCached);
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(enc));
+  }catch(e){
+    console.error("Persist error", e);
+  }
+}
 
-  const data = {
-    content: text,
-    time: new Date().toLocaleString()
+async function loadFromStorageWithPassword(password){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) { entries = []; currentIndex = -1; return; }
+  let parsed;
+  try{ parsed = JSON.parse(raw) }catch(e){ parsed = null }
+  if(!parsed || !parsed.iv || !parsed.salt || !parsed.data){
+    // not encrypted in expected form — do nothing to avoid data loss
+    // (this might be older/other format)
+    console.warn("Stored data not in encrypted form.");
+    throw new Error("Stored data not in encrypted form.");
+  }
+  const payload = await decryptObject(parsed, password);
+  entries = payload.entries || [];
+  if(!Array.isArray(entries)) entries = [];
+  currentIndex = entries.length>0?0:-1;
+}
+
+/* ===========================
+   Lock / Unlock UI
+   =========================== */
+function showLockOverlay(){
+  lockOverlay.style.display = "flex";
+  unlockPassword.value = "";
+  unlockPassword.focus();
+}
+function hideLockOverlay(){ lockOverlay.style.display = "none" }
+
+async function unlockWithPassword(){
+  const pw = unlockPassword.value || "";
+  if(!pw) return alert("Nhập mật khẩu!");
+  try{
+    await loadFromStorageWithPassword(pw);
+    passwordCached = pw;
+    locked = false;
+    hideLockOverlay();
+    renderEntriesList();
+    if(entries.length>0) openIndex(0);
+    else { clearEditor(); }
+    lockState.textContent = "Unlocked";
+    lockBtn.textContent = "🔒 Lock";
+  }catch(e){
+    console.error(e);
+    alert("Sai mật khẩu hoặc dữ liệu lỗi.");
+  }
+}
+
+/* create a new password and init empty diary (if nothing exists) */
+async function createPasswordAndInit(){
+  const pw = prompt("Nhập mật khẩu mới (ghi nhớ nó!)");
+  if(!pw) return;
+  const initial = {entries:[]};
+  const enc = await encryptObject(initial, pw);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(enc));
+  passwordCached = pw;
+  locked = false;
+  await loadFromStorageWithPassword(pw);
+  renderEntriesList();
+  hideLockOverlay();
+  alert("Đã tạo nhật kí và đặt mật khẩu mới.");
+}
+
+/* lock app (clear password from memory) */
+function lockApp(){
+  if(confirm("Khoá nhật kí? Bạn sẽ cần mật khẩu để mở lại.")){
+    passwordCached = null;
+    locked = true;
+    clearEditor();
+    renderEntriesList();
+    lockState.textContent = "Locked";
+    lockBtn.textContent = "🔓 Unlock";
+    showLockOverlay();
+  }
+}
+
+/* ===========================
+   Export / Import encrypted
+   =========================== */
+function exportEncrypted(){
+  const data = localStorage.getItem(STORAGE_KEY);
+  if(!data) return alert("Không có dữ liệu để xuất.");
+  const blob = new Blob([data], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "secret-diary.enc.json";
+  a.click();
+}
+
+function importEncrypted(){
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+  input.onchange = e=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const parsed = JSON.parse(reader.result);
+        // simple validation
+        if(!parsed.iv || !parsed.salt || !parsed.data) return alert("Không phải file mã hoá hợp lệ.");
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        alert("Đã nhập file mã hoá. Vui lòng mở lại bằng mật khẩu tương ứng.");
+      }catch(err){ alert("File không hợp lệ."); }
+    };
+    reader.readAsText(f);
   };
-
-  localStorage.setItem("SECRET_DIARY", JSON.stringify(data));
-  alert("Đã lưu trang nhật kí này!");
+  input.click();
 }
 
-function clearEntry(){
-  if(confirm("Huy chắc chắn muốn xoá trang này chứ?")){
-    document.getElementById("note").value="";
+/* ===========================
+   Import legacy unencrypted (SECRET_DIARY)
+   - This will prompt for a password to encrypt it into secret-diary
+   - If you previously saved plain object under SECRET_DIARY, you can migrate
+   =========================== */
+function importLegacy(){
+  const raw = localStorage.getItem(LEGACY_KEY);
+  if(!raw) return alert("Không tìm thấy dữ liệu legacy (SECRET_DIARY).");
+  let parsed;
+  try{ parsed = JSON.parse(raw) }catch(e){ parsed = null }
+  if(!parsed || !parsed.content){
+    return alert("Dữ liệu legacy không ở định dạng mong đợi.");
   }
+  const pw = prompt("Nhập mật khẩu mới để mã hoá dữ liệu legacy:");
+  if(!pw) return;
+  // construct entries array with that single content
+  const e = {id: uid(), title: parsed.content.split("\n").find(l=>l.trim()) || "Trang", content: parsed.content, created: (parsed.time||nowISO())};
+  const payload = {entries:[e]};
+  encryptObject(payload, pw).then(enc=>{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(enc));
+    localStorage.removeItem(LEGACY_KEY);
+    alert("Đã mã hoá và nhập legacy thành công. Dữ liệu bây giờ nằm trong secret-diary.");
+  }).catch(err=>{
+    console.error(err);
+    alert("Lỗi khi mã hoá legacy.");
+  });
 }
 
-window.onload = ()=>{
-  const old = localStorage.getItem("SECRET_DIARY");
-  if(old){
-    const data = JSON.parse(old);
-    document.getElementById("note").value = data.content;
-  }
+/* ===========================
+   Panic (wipe everything)
+   =========================== */
+function panicClearAll(){
+  if(!confirm("PANIC: Xoá toàn bộ dữ liệu mã hoá trên trình duyệt? (Không thể khôi phục)")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(LEGACY_KEY);
+  passwordCached = null;
+  entries = [];
+  currentIndex = -1;
+  locked = true;
+  clearEditor();
+  renderEntriesList();
+  alert("Đã xoá xong. Trang sẽ reload.");
+  location.reload();
 }
+
+/* ===========================
+   Auto-save while editing (debounce)
+   =========================== */
+let autosaveTimer = null;
+editor.addEventListener("input", ()=>{
+  if(locked) return;
+  if(autosaveTimer) clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(()=>{
+    // update model but don't alert
+    if(currentIndex<0) {
+      // create a new entry silently
+      const id = uid();
+      const e = {id, title: "Trang tạm", content: editor.value, created: nowISO()};
+      entries.unshift(e);
+      currentIndex = 0;
+    } else {
+      entries[currentIndex].content = editor.value;
+      entries[currentIndex].title = editor.value.split("\n").find(l=>l.trim()) || entries[currentIndex].title || "Trang";
+    }
+    persist(); renderEntriesList();
+  }, 900);
+});
+
+/* ===========================
+   INIT: wire up buttons
+   =========================== */
+newBtn.onclick = ()=>{ newEntry() };
+saveBtn.onclick = ()=>{ saveCurrent() };
+deleteBtn.onclick = ()=>{ deleteCurrent() };
+prevBtn.onclick = ()=>{ prevEntry() };
+nextBtn.onclick = ()=>{ nextEntry() };
+lockBtn.onclick = ()=>{ if(locked) showLockOverlay(); else lockApp(); };
+unlockBtn.onclick = ()=>{ unlockWithPassword(); };
+setPassBtn.onclick = ()=>{ createPasswordAndInit(); };
+exportBtn.onclick = ()=>{ exportEncrypted(); };
+importBtn.onclick = ()=>{ importEncrypted(); };
+importLegacyBtn.onclick = ()=>{ importLegacy(); };
+panicBtn.onclick = ()=>{ panicClearAll(); };
+
+/* keyboard shortcuts */
+document.addEventListener("keydown", e=>{
+  if(e.ctrlKey && e.key.toLowerCase()==='s'){ e.preventDefault(); saveCurrent(); }
+  if(e.ctrlKey && e.key.toLowerCase()==='n'){ e.preventDefault(); newEntry(); }
+});
+
+/* ===========================
+   On load: if storage exists and encrypted, show lock overlay to ask password.
+   If no storage, show overlay allowing create password.
+   =========================== */
+window.addEventListener("load", ()=>{
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw){
+    // no diary yet -> ask to create or allow unlock overlay with create option
+    locked = true;
+    showLockOverlay();
+    document.getElementById("unlockBtn").textContent = "Mở nhật kí (có thể bỏ trống)";
+    // keep setPassBtn visible to init
+  }else{
+    // likely encrypted: require password
+    locked = true;
+    showLockOverlay();
+  }
+});
+
+/* small helper: if user closes tab, clear cached password (for safety) */
+window.addEventListener("beforeunload", ()=>{
+  // do not clear localStorage (data), but forget cached pw
+  passwordCached = null;
+});
 </script>
 
 </body>
